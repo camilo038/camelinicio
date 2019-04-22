@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:cxf="http://camel.apache.org/schema/cxf"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring        http://camel.apache.org/schema/spring/camel-spring.xsd  http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf-2.8.3.xsd">
+    <cxf:cxfEndpoint address="http://localhost:9292/cxf/report"
+        id="reportEndpoint" serviceClass="com.mycompany.camel.cxf.code.first.spring.incident.IncidentService"/>
+    <!--     <bean -->
+    <!--         class="com.mycompany.camel.cxf.code.first.spring.incident.ReportIncidentProcessor" id="reportIncidentProcessor"/> -->
+    <bean
+        class="com.mycompany.camel.cxf.code.first.spring.incident.StatusIncidentProcessor" id="statusIncidentProcessor"/>
+    <camelContext id="camel" streamCache="true" threadNamePattern="100" xmlns="http://camel.apache.org/schema/spring">
+        <threadPoolProfile defaultProfile="true" id="changedProfile"
+            maxQueueSize="100" poolSize="3"/>
+        <!--                 <onException> -->
+        <!--                     <exception>java.sql.SQLException</exception> -->
+        <!--                     <handled> -->
+        <!--                         <constant>true</constant> -->
+        <!--                     </handled> -->
+        <!--                     <to uri="direct:errorDB"/> -->
+        <!--                 </onException> -->
+        <!--                 <onException> -->
+        <!--                     <exception>org.xml.sax.SAXException</exception> -->
+        <!--                     <handled> -->
+        <!--                         <constant>true</constant> -->
+        <!--                     </handled> -->
+        <!--                     <to uri="direct:errorXML"/> -->
+        <!--                 </onException> -->
+        <!--                 <onException> -->
+        <!--                     <exception>javax.jms.JMSException</exception> -->
+        <!--                     <handled> -->
+        <!--                         <constant>true</constant> -->
+        <!--                     </handled> -->
+        <!--                     <to uri="direct:errorJMS"/> -->
+        <!--                 </onException> -->
+        <route id="TR_inciio">
+            <!-- route starts from the cxf webservice in POJO mode -->
+            <from id="reportEndpointListener" uri="cxf:bean:reportEndpoint?dataFormat=MESSAGE"/>
+            <!--             <setProperty id="_setProperty1" propertyName="detalles"> -->
+            <!--                 <xpath resultType="String">//incidentId/text()</xpath> -->
+            <!--             </setProperty> -->
+            <!--             <log id="_log4" message="la propiedad es  ${property.detalles}"/> -->
+            <!--             <to id="_to15" uri="velocity:int/xmlResponseUno.vm"/> -->
+            <!--             <setBody id="_setBody1"> -->
+            <!--                 <simple>${body}</simple> -->
+            <!--             </setBody> -->
+            <!--             <to id="_to15" uri="velocity:int/xmlResponseUno.vm"/> -->
+            <log id="_log3" message="este el cuerpo ${body}"/>
+            <to id="_toD1" uri="direct:propiedades"/>
+        </route>
+        <route id="propiedades">
+            <from id="_from2" uri="direct:propiedades"/>
+            <setProperty id="_setProperty1" propertyName="incidentId">
+                <xpath resultType="String">//incidentId/text()</xpath>
+            </setProperty>
+            <to id="_to1" uri="direct:trasnformacion"/>
+        </route>
+        <route id="_route1">
+            <from id="_from1" uri="direct:trasnformacion"/>
+            <log id="_log1" message="hello   ruta ${property.incidentId}"/>
+            <to id="_to15" uri="velocity:int/xmlResponseUno.vm"/>
+        </route>
+    </camelContext>
+</beans>
