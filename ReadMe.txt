@@ -5,7 +5,7 @@ Instalar
 
     mvn install
 
-Antes del deploy
+Antes del deploy JBoss Fuse  6.3 Karaf fabric
 
     features:install camel-velocity
     features:install camel-cxf
